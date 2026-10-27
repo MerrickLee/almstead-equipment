@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatOrderNumber } from "@/lib/constants";
 import { getOrder, listOrders } from "@/lib/db";
-import { fmtDate, fmtDateTime } from "@/lib/format";
+import { fmtDate, fmtDateTime, unitLabel } from "@/lib/format";
 import { requireManager } from "@/lib/session";
 import { OrderDetail } from "@/components/OrderDetail";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -32,7 +32,7 @@ export default async function ManagerOrderPage({ params }: { params: Promise<{ i
             <StatusBadge status={order.status} />
           </div>
           <span className="text-[14px] text-muted">
-            Truck #{order.truck_number} · Submitted by {order.mechanic?.full_name ?? "—"}, {fmtDateTime(order.submitted_at)}
+            Unit {unitLabel(order.truck_number)} · Submitted by {order.mechanic?.full_name ?? "—"}, {fmtDateTime(order.submitted_at)}
           </span>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -44,7 +44,7 @@ export default async function ManagerOrderPage({ params }: { params: Promise<{ i
           </Link>
           {order.truck_id ? (
             <Link href={`/manager/trucks/${order.truck_id}`} className="btn-secondary min-h-10 text-[13px]">
-              <History size={16} /> Truck #{order.truck_number} history
+              <History size={16} /> Unit {unitLabel(order.truck_number)} history
             </Link>
           ) : null}
         </div>
@@ -58,7 +58,7 @@ export default async function ManagerOrderPage({ params }: { params: Promise<{ i
           <ReviewPanel orderId={order.id} status={order.status} notes={order.manager_notes} />
           {order.truck_id ? (
             <section className="card flex flex-col gap-2 p-4">
-              <span className="section-title">Truck #{order.truck_number} · other orders</span>
+              <span className="section-title">Unit {unitLabel(order.truck_number)} · other orders</span>
               {history.length === 0 ? (
                 <p className="text-[13px] text-muted">No other orders for this truck.</p>
               ) : (

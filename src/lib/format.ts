@@ -36,6 +36,11 @@ export function nowHHMM(): string {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
+/** "#103" — but never "##95" when the stored number already carries a hash. */
+export function unitLabel(truckNumber: string): string {
+  return truckNumber.startsWith("#") ? truckNumber : `#${truckNumber}`;
+}
+
 export function initials(name: string): string {
   return name
     .split(/\s+/)

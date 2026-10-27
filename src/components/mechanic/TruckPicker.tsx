@@ -2,6 +2,7 @@
 
 import { Check, Search, Truck as TruckIcon, Wrench, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { unitLabel } from "@/lib/format";
 import type { Truck } from "@/lib/types";
 
 interface Props {
@@ -59,7 +60,7 @@ export function TruckPicker({ trucks, truckId, truckNumber, onPick }: Props) {
           <>
             <KindIcon kind={selected.kind} />
             <span className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate text-[16px] font-semibold">#{selected.truck_number}{selected.description ? ` · ${selected.description}` : ""}</span>
+              <span className="truncate text-[16px] font-semibold">{unitLabel(selected.truck_number)}{selected.description ? ` · ${selected.description}` : ""}</span>
               <span className="truncate text-[12px] text-muted">{selected.branch ?? "No branch on file"}</span>
             </span>
           </>
@@ -67,7 +68,7 @@ export function TruckPicker({ trucks, truckId, truckNumber, onPick }: Props) {
           <>
             <Wrench size={20} className="shrink-0 text-muted" />
             <span className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate text-[16px] font-semibold">#{truckNumber}</span>
+              <span className="truncate text-[16px] font-semibold">{unitLabel(truckNumber)}</span>
               <span className="text-[12px] text-muted">Not in the fleet list — typed in</span>
             </span>
           </>
@@ -106,7 +107,7 @@ export function TruckPicker({ trucks, truckId, truckNumber, onPick }: Props) {
             <button type="button" role="option" aria-selected={t.id === truckId} onClick={() => choose(t)} className="flex min-h-13 w-full items-center gap-3 border-b border-line px-3 py-2 text-left hover:bg-ground">
               <KindIcon kind={t.kind} />
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="truncate text-[15px] font-semibold">#{t.truck_number}{t.description ? ` · ${t.description}` : ""}</span>
+                <span className="truncate text-[15px] font-semibold">{unitLabel(t.truck_number)}{t.description ? ` · ${t.description}` : ""}</span>
                 <span className="truncate text-[12px] text-muted">{[t.kind === "equipment" ? "Equipment" : "Vehicle", t.branch].filter(Boolean).join(" · ")}</span>
               </span>
               {t.id === truckId ? <Check size={18} className="text-brand" /> : null}

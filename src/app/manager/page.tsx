@@ -2,7 +2,7 @@ import { Download } from "lucide-react";
 import Link from "next/link";
 import { BRANCHES, formatOrderNumber } from "@/lib/constants";
 import { dashboardStats, listOrders, listStaff, listTrucks, type OrderFilters } from "@/lib/db";
-import { fmtDate } from "@/lib/format";
+import { fmtDate, unitLabel } from "@/lib/format";
 import { requireManager } from "@/lib/session";
 import { StatusBadge } from "@/components/StatusBadge";
 
@@ -104,7 +104,7 @@ export default async function ManagerOrdersPage({ searchParams }: { searchParams
           <option value="">All trucks</option>
           {trucks.map((t) => (
             <option key={t.id} value={t.id}>
-              #{t.truck_number}
+              {unitLabel(t.truck_number)}
               {t.description ? ` — ${t.description}` : ""}
             </option>
           ))}
@@ -156,7 +156,7 @@ export default async function ManagerOrdersPage({ searchParams }: { searchParams
                     </Link>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">{fmtDate(o.work_date, { month: "short", day: "numeric" })}</td>
-                  <td className="px-4 py-3 font-semibold">#{o.truck_number}</td>
+                  <td className="px-4 py-3 font-semibold">{unitLabel(o.truck_number)}</td>
                   <td className="px-4 py-3 whitespace-nowrap">{o.mechanic?.full_name ?? "—"}</td>
                   <td className="px-4 py-3 whitespace-nowrap">{o.branch ?? "—"}</td>
                   <td className="max-w-[280px] truncate px-4 py-3 text-[#3e4f42]">{o.summary || o.work_performed || "—"}</td>

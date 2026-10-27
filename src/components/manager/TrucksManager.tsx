@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { BRANCHES, TRUCK_KINDS } from "@/lib/constants";
+import { unitLabel } from "@/lib/format";
 import type { Truck } from "@/lib/types";
 
 const empty = { truck_number: "", description: "", branch: "", kind: "vehicle" as Truck["kind"], asset_id: "" };
@@ -178,7 +179,7 @@ export function TrucksManager({ initial }: { initial: Truck[] }) {
                 <tr key={t.id} className={`border-t border-[#eef2ee] ${!t.active ? "text-muted" : ""}`}>
                   <td className="px-4 py-3">
                     <Link href={`/manager/trucks/${t.id}`} className="font-semibold text-brand">
-                      #{t.truck_number}
+                      {unitLabel(t.truck_number)}
                     </Link>
                   </td>
                   <td className="px-4 py-3">{t.description ?? "—"}</td>

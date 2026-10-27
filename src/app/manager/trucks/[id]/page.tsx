@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatOrderNumber } from "@/lib/constants";
 import { getTruck, listOrders } from "@/lib/db";
-import { fmtDate } from "@/lib/format";
+import { fmtDate, unitLabel } from "@/lib/format";
 import { requireManager } from "@/lib/session";
 import { StatusBadge } from "@/components/StatusBadge";
 
@@ -26,7 +26,7 @@ export default async function TruckHistoryPage({ params }: { params: Promise<{ i
       </Link>
       <div>
         <h1 className="text-[24px] font-bold tracking-tight">
-          Truck #{truck.truck_number}
+          Unit {unitLabel(truck.truck_number)}
           {!truck.active ? <span className="badge-reviewed ml-3 align-middle">Inactive</span> : null}
         </h1>
         <p className="text-[13px] text-muted">
