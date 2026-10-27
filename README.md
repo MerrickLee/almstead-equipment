@@ -17,18 +17,21 @@ Mechanic (phone PWA)                     Manager (any browser)
 
 ## 1. Supabase (already done — 2026-10-27)
 
-The project exists in the **Almstead** org: **Repair Orders**, ref `bethrbtergsvtafmsgpy`, `us-east-1`, Micro compute, and `supabase/migrations/0001_init.sql` has been run. That migration created:
+The project exists in the **Almstead** org: **Repair Orders**, ref `bethrbtergsvtafmsgpy`, `us-east-1`, Micro compute, and both files in `supabase/migrations/` have been run (`0001_init.sql`, then `0002_service_role_grants.sql`). Together they create:
 
 - `staff` (mechanics + managers, bcrypt-hashed PINs), `trucks`, `repair_orders`, `repair_order_photos`
 - a **private** storage bucket `repair-orders` for photos and signatures
-- Row Level Security on every table with no policies — only the app's service-role key can read anything.
+- Row Level Security on every table with no policies — only the app's service-role key can read anything
+- explicit grants for `service_role` (needed because the project was created with "Automatically expose new tables" off).
+
+**Hosting:** Vercel project `almstead-repair-orders` (team "merrick lee's projects", managed from the merricklee@me.com login) → https://almstead-repair-orders.vercel.app, deploying from `main` on GitHub `MerrickLee/almstead-equipment`.
 
 Values for `.env.local` / Vercel:
 
 - `SUPABASE_URL` = `https://bethrbtergsvtafmsgpy.supabase.co`
 - `SUPABASE_SERVICE_ROLE_KEY` = **Project Settings → API Keys → Secret keys → default** (`sb_secret_…`). The legacy `service_role` JWT on the "Legacy" tab works too.
 
-To recreate from scratch, run the migration file in **SQL Editor → New query** on a fresh project.
+To recreate from scratch, run the two migration files in order in **SQL Editor → New query** on a fresh project.
 
 ## 2. Run locally
 

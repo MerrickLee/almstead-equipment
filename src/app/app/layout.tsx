@@ -13,7 +13,7 @@ export default async function MechanicLayout({ children }: { children: React.Rea
       <header className="safe-top bg-brand px-5 pb-3 text-white">
         <div className="flex items-center gap-3 pt-2">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white">
-            <Image src="/logo.png" alt="" width={32} height={32} />
+            <Image src="/logo-mark.png" alt="" width={30} height={30} />
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="text-[12px] opacity-85">Repair Orders</span>

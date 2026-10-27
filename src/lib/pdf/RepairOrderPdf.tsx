@@ -13,7 +13,7 @@ const s = StyleSheet.create({
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 },
   title: { fontFamily: "Times-Bold", fontSize: 22, marginBottom: 2 },
   addr: { fontSize: 8.5, color: MUTED, lineHeight: 1.35 },
-  logo: { width: 86, height: 86 },
+  logo: { width: 200, height: 46, objectFit: "contain" },
   orderNo: { fontFamily: "Helvetica-Bold", fontSize: 11, color: GREEN, marginTop: 4 },
   status: { fontSize: 8, color: MUTED, marginTop: 2 },
 

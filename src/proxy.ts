@@ -3,7 +3,7 @@ import { SESSION_COOKIE } from "@/lib/constants";
 import { verifySession } from "@/lib/session-core";
 
 // Routes that never need a session.
-const PUBLIC_PREFIXES = ["/login", "/offline", "/api/auth/", "/manifest.webmanifest", "/sw.js", "/icons/", "/logo.png"];
+const PUBLIC_PREFIXES = ["/login", "/offline", "/api/auth/", "/manifest.webmanifest", "/sw.js", "/icons/", "/logo-"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

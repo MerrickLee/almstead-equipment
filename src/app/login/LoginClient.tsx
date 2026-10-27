@@ -103,8 +103,8 @@ export function LoginClient() {
 
   return (
     <main className="safe-top safe-bottom mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pt-10">
-      <div className="mb-6 flex flex-col items-center gap-2">
-        <Image src="/logo.png" alt="Almstead Tree, Shrub & Lawn Care" width={104} height={104} priority />
+      <div className="mb-6 flex flex-col items-center gap-3">
+        <Image src="/logo-horizontal.png" alt="Almstead Tree, Shrub & Lawn Care" width={260} height={60} priority className="h-auto w-[260px]" />
         <h1 className="text-[22px] font-bold tracking-tight">Repair Orders</h1>
       </div>
 

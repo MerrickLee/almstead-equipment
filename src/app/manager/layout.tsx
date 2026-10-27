@@ -12,7 +12,7 @@ export default async function ManagerLayout({ children }: { children: React.Reac
       <aside className="safe-top flex w-full flex-col gap-1.5 bg-ink px-4 pb-4 text-line md:w-[232px] md:min-h-dvh md:pt-6">
         <div className="flex items-center gap-2.5 px-2 pt-2 pb-2 md:pb-5">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white">
-            <Image src="/logo.png" alt="" width={30} height={30} />
+            <Image src="/logo-mark.png" alt="" width={28} height={28} />
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="text-[14px] font-bold text-white">Repair Orders</span>

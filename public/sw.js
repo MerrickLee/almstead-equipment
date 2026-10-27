@@ -15,7 +15,7 @@ const SHELL_CACHE = `shell-${VERSION}`;
 const STATIC_CACHE = `static-${VERSION}`;
 const DATA_CACHE = `data-${VERSION}`;
 
-const PRECACHE = ["/offline", "/login", "/manifest.webmanifest", "/logo.png", "/icons/icon-192.png", "/icons/icon-512.png"];
+const PRECACHE = ["/offline", "/login", "/manifest.webmanifest", "/logo-horizontal.png", "/logo-mark.png", "/icons/icon-192.png", "/icons/icon-512.png"];
 const WARM_PAGES = ["/app", "/app/orders/new", "/app/orders"];
 
 self.addEventListener("install", (event) => {
@@ -78,7 +78,7 @@ self.addEventListener("fetch", (event) => {
   if (url.pathname.startsWith("/api/")) return;
 
   // Icons, logo, manifest: stale-while-revalidate.
-  if (url.pathname.startsWith("/icons/") || url.pathname === "/logo.png" || url.pathname === "/manifest.webmanifest") {
+  if (url.pathname.startsWith("/icons/") || url.pathname.startsWith("/logo-") || url.pathname === "/manifest.webmanifest") {
     event.respondWith(staleWhileRevalidate(req, STATIC_CACHE));
     return;
   }
