@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #00853e;
+  --color-brand-dark: #006a31;
+  --color-brand-light: #dff2e6;
+  --color-ink: #14271b;
+  --color-muted: #5a6b5e;
+  --color-line: #dce5dd;
+  --color-ground: #f3f6f3;
+  --color-sun: #fdee6d;
+  --color-sun-dark: #8a6d00;
+  --color-sun-light: #fff3bf;
+  --color-slate-ink: #3a4a5c;
+  --color-slate-light: #e6ebf1;
+  --color-danger: #b42318;
+  --color-danger-light: #fee4e2;
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background: var(--color-ground);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Keep content clear of the iPhone notch / home indicator when installed. */
+@utility safe-top {
+  padding-top: max(12px, env(safe-area-inset-top));
+}
+@utility safe-bottom {
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+/* Inputs: 16px font prevents iOS from zooming on focus. */
+@utility field {
+  @apply w-full rounded-xl border border-line bg-white px-3 text-[16px] text-ink outline-none;
+  min-height: 48px;
+  &:focus {
+    @apply border-brand ring-2 ring-brand/20;
+  }
+  &[readonly] {
+    @apply bg-ground;
+  }
+}
+@utility label {
+  @apply mb-1.5 block text-[13px] font-semibold text-ink;
+}
+@utility section-title {
+  @apply text-[12px] font-bold uppercase tracking-[0.06em] text-brand;
+}
+@utility card {
+  @apply rounded-2xl border border-line bg-white;
+}
+@utility btn-primary {
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand px-4 text-[15px] font-semibold text-white transition hover:bg-brand-dark disabled:opacity-50;
+}
+@utility btn-secondary {
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-line bg-white px-4 text-[15px] font-semibold text-ink transition hover:bg-ground disabled:opacity-50;
+}
+@utility btn-danger {
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-danger/30 bg-white px-4 text-[15px] font-semibold text-danger transition hover:bg-danger-light disabled:opacity-50;
+}
+@utility badge-pending {
+  @apply inline-flex items-center rounded-full bg-sun-light px-2 py-1 text-[11px] font-bold text-sun-dark;
+}
+@utility badge-submitted {
+  @apply inline-flex items-center rounded-full bg-brand-light px-2 py-1 text-[11px] font-bold text-brand-dark;
+}
+@utility badge-reviewed {
+  @apply inline-flex items-center rounded-full bg-slate-light px-2 py-1 text-[11px] font-bold text-slate-ink;
+}
+
+textarea.field {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  line-height: 1.5;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
