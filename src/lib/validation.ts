@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BRANCHES, MANAGER_PASSCODE_MIN, MECHANIC_PIN_MAX, MECHANIC_PIN_MIN } from "./constants";
+import { BRANCHES, MANAGER_PASSCODE_MIN, MECHANIC_PIN_MAX, MECHANIC_PIN_MIN, TRUCK_KINDS } from "./constants";
 
 const emptyToNull = (v: unknown) => (v === "" || v === undefined ? null : v);
 const trimmed = z.string().trim();
@@ -70,6 +70,8 @@ export const truckInputSchema = z.object({
   truck_number: trimmed.min(1).max(40),
   description: z.preprocess(emptyToNull, trimmed.max(200).nullable()),
   branch: z.preprocess(emptyToNull, z.enum(BRANCHES).nullable()),
+  kind: z.enum(TRUCK_KINDS).optional(),
+  asset_id: z.preprocess(emptyToNull, trimmed.max(40).nullable()).optional(),
   active: z.boolean().optional(),
 });
 

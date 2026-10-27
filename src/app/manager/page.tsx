@@ -158,7 +158,7 @@ export default async function ManagerOrdersPage({ searchParams }: { searchParams
                   <td className="px-4 py-3 whitespace-nowrap">{fmtDate(o.work_date, { month: "short", day: "numeric" })}</td>
                   <td className="px-4 py-3 font-semibold">#{o.truck_number}</td>
                   <td className="px-4 py-3 whitespace-nowrap">{o.mechanic?.full_name ?? "—"}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">{o.branch?.split(",")[0] ?? "—"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{o.branch ?? "—"}</td>
                   <td className="max-w-[280px] truncate px-4 py-3 text-[#3e4f42]">{o.summary || o.work_performed || "—"}</td>
                   <td className="px-4 py-3 text-right">{o.total_hours ?? "—"}</td>
                   <td className="px-4 py-3">

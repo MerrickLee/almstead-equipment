@@ -20,12 +20,15 @@ export async function PATCH(request: Request, { params }: Ctx) {
     truck_number: existing.truck_number,
     description: existing.description,
     branch: existing.branch,
+    kind: existing.kind,
+    asset_id: existing.asset_id,
     ...body,
   });
   if (!parsed.success) return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 });
 
   try {
-    const truck = await updateTruck(id, parsed.data);
+    const { asset_id, ...rest } = parsed.data;
+    const truck = await updateTruck(id, { ...rest, ...(asset_id !== undefined ? { asset_id } : {}) });
     return NextResponse.json({ truck });
   } catch (err) {
     const msg = (err as { code?: string; message: string }).code === "23505" ? "That truck number already exists." : (err as Error).message;

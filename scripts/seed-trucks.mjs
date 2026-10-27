@@ -2,7 +2,8 @@
 //
 //   npm run seed-trucks -- trucks.csv
 //
-// CSV columns (header row required): truck_number,description,branch
+// CSV columns (header row required): truck_number,description,branch[,kind][,asset_id]
+//   kind is "vehicle" (default) or "equipment".
 // Existing truck numbers are updated, new ones inserted.
 
 import { readFileSync } from "node:fs";
@@ -34,10 +35,14 @@ if (col("truck_number") === -1) {
 
 const rows = lines.map((line) => {
   const cells = line.split(",").map((c) => c.trim());
+  const kind = col("kind") >= 0 ? (cells[col("kind")] || "vehicle").toLowerCase() : "vehicle";
   return {
     truck_number: cells[col("truck_number")],
     description: col("description") >= 0 ? cells[col("description")] || null : null,
     branch: col("branch") >= 0 ? cells[col("branch")] || null : null,
+    kind: kind === "equipment" ? "equipment" : "vehicle",
+    asset_id: col("asset_id") >= 0 ? cells[col("asset_id")] || null : null,
+    source: "manual",
     active: true,
   };
 });

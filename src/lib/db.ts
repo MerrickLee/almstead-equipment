@@ -106,12 +106,15 @@ export async function countManagers(): Promise<number> {
 // ---------------------------------------------------------------------------
 // Trucks
 // ---------------------------------------------------------------------------
+const naturalCollator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
+
 export async function listTrucks(opts?: { activeOnly?: boolean }): Promise<Truck[]> {
-  let q = supabase().from("trucks").select("*").order("truck_number");
+  let q = supabase().from("trucks").select("*").limit(2000);
   if (opts?.activeOnly) q = q.eq("active", true);
   const { data, error } = await q;
   if (error) throw error;
-  return data as Truck[];
+  // Unit numbers are text ("62", "62-A", "610T"); sort them the way people read them.
+  return (data as Truck[]).sort((a, b) => naturalCollator.compare(a.truck_number, b.truck_number));
 }
 
 export async function getTruck(id: string): Promise<Truck | null> {
@@ -120,15 +123,32 @@ export async function getTruck(id: string): Promise<Truck | null> {
   return data as Truck | null;
 }
 
-export async function createTruck(input: { truck_number: string; description: string | null; branch: string | null }): Promise<Truck> {
-  const { data, error } = await supabase().from("trucks").insert(input).select("*").single();
+export async function createTruck(input: {
+  truck_number: string;
+  description: string | null;
+  branch: string | null;
+  kind?: Truck["kind"];
+  asset_id?: string | null;
+}): Promise<Truck> {
+  const { data, error } = await supabase()
+    .from("trucks")
+    .insert({ ...input, kind: input.kind ?? "vehicle", source: "manual" })
+    .select("*")
+    .single();
   if (error) throw error;
   return data as Truck;
 }
 
 export async function updateTruck(
   id: string,
-  patch: Partial<{ truck_number: string; description: string | null; branch: string | null; active: boolean }>,
+  patch: Partial<{
+    truck_number: string;
+    description: string | null;
+    branch: string | null;
+    kind: Truck["kind"];
+    asset_id: string | null;
+    active: boolean;
+  }>,
 ): Promise<Truck> {
   const { data, error } = await supabase().from("trucks").update(patch).eq("id", id).select("*").single();
   if (error) throw error;

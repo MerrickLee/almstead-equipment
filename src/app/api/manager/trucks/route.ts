@@ -23,6 +23,8 @@ export async function POST(request: Request) {
       truck_number: parsed.data.truck_number,
       description: parsed.data.description,
       branch: parsed.data.branch,
+      kind: parsed.data.kind,
+      asset_id: parsed.data.asset_id ?? null,
     });
     return NextResponse.json({ truck }, { status: 201 });
   } catch (err) {

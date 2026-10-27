@@ -8,9 +8,9 @@ import { clearDraft, enqueue, flushOutbox, loadDraft, newClientId, saveDraft, ty
 import type { RepairOrderInput, SessionUser, Truck } from "@/lib/types";
 import { PhotoCapture } from "@/components/PhotoCapture";
 import { SignaturePad } from "@/components/SignaturePad";
+import { TruckPicker } from "@/components/mechanic/TruckPicker";
 
 const TRUCKS_KEY = "ro:trucks";
-const OTHER = "__other__";
 
 interface Props {
   user: SessionUser;
@@ -53,7 +53,6 @@ export function RepairOrderForm({ user, initialTrucks, existing }: Props) {
 
   const [trucks, setTrucks] = useState<Truck[]>(initialTrucks);
   const [values, setValues] = useState<RepairOrderInput>(existing?.values ?? emptyValues(user));
-  const [truckChoice, setTruckChoice] = useState<string>(existing?.values.truck_id ?? (existing ? OTHER : ""));
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [signature, setSignature] = useState<string | null>(null);
   const [travelH, setTravelH] = useState<string>(existing?.values.travel_time_minutes ? String(Math.floor(existing.values.travel_time_minutes / 60)) : "");
@@ -93,7 +92,6 @@ export function RepairOrderForm({ user, initialTrucks, existing }: Props) {
         setValues(d.values);
         setPhotos(d.photos ?? []);
         setSignature(d.signature ?? null);
-        setTruckChoice(d.values.truck_id ?? (d.values.truck_number ? OTHER : ""));
         if (d.values.travel_time_minutes !== null) {
           setTravelH(String(Math.floor(d.values.travel_time_minutes / 60)));
           setTravelM(String(d.values.travel_time_minutes % 60));
@@ -118,14 +116,7 @@ export function RepairOrderForm({ user, initialTrucks, existing }: Props) {
     setValues((prev) => ({ ...prev, [key]: v }));
   }, []);
 
-  const onTruckChange = (choice: string) => {
-    setTruckChoice(choice);
-    if (choice === OTHER || choice === "") {
-      set("truck_id", null);
-      if (choice === "") set("truck_number", "");
-      return;
-    }
-    const t = trucks.find((x) => x.id === choice);
+  const onTruckPick = (t: Truck | null, freeText?: string) => {
     if (t) {
       setValues((prev) => ({
         ...prev,
@@ -133,6 +124,8 @@ export function RepairOrderForm({ user, initialTrucks, existing }: Props) {
         truck_number: t.truck_number,
         branch: t.branch && (BRANCHES as readonly string[]).includes(t.branch) ? t.branch : prev.branch,
       }));
+    } else {
+      setValues((prev) => ({ ...prev, truck_id: null, truck_number: freeText ?? "" }));
     }
   };
 
@@ -151,7 +144,6 @@ export function RepairOrderForm({ user, initialTrucks, existing }: Props) {
     setValues(emptyValues(user));
     setPhotos([]);
     setSignature(null);
-    setTruckChoice("");
     setTravelH("");
     setTravelM("");
     setDraftRestored(false);
@@ -242,29 +234,8 @@ export function RepairOrderForm({ user, initialTrucks, existing }: Props) {
         </div>
 
         <div>
-          <label className="label" htmlFor="truck">
-            Truck #
-          </label>
-          <select id="truck" className="field font-semibold" value={truckChoice} onChange={(e) => onTruckChange(e.target.value)}>
-            <option value="">Choose a truck…</option>
-            {trucks.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.truck_number}
-                {t.description ? ` — ${t.description}` : ""}
-                {t.branch ? ` (${t.branch.split(",")[0]})` : ""}
-              </option>
-            ))}
-            <option value={OTHER}>Not listed — type it in</option>
-          </select>
-          {truckChoice === OTHER ? (
-            <input
-              className="field mt-2"
-              placeholder="Truck or equipment number"
-              value={values.truck_number}
-              onChange={(e) => set("truck_number", e.target.value)}
-              autoFocus
-            />
-          ) : null}
+          <span className="label">Truck / equipment #</span>
+          <TruckPicker trucks={trucks} truckId={values.truck_id} truckNumber={values.truck_number} onPick={onTruckPick} />
         </div>
 
         <div>
@@ -334,30 +305,26 @@ export function RepairOrderForm({ user, initialTrucks, existing }: Props) {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="label" htmlFor="start_time">
-              Start time
-            </label>
-            <div className="flex gap-2">
-              <input id="start_time" type="time" className="field" value={values.start_time ?? ""} onChange={(e) => set("start_time", e.target.value || null)} />
-              {!values.start_time ? (
-                <button type="button" onClick={() => set("start_time", nowHHMM())} className="btn-secondary shrink-0 px-3 text-[13px]">
-                  Now
-                </button>
-              ) : null}
+            <div className="mb-1.5 flex items-baseline justify-between">
+              <label className="text-[13px] font-semibold" htmlFor="start_time">
+                Start time
+              </label>
+              <button type="button" onClick={() => set("start_time", nowHHMM())} className="min-h-6 px-1 text-[12px] font-semibold text-brand">
+                Now
+              </button>
             </div>
+            <input id="start_time" type="time" className="field min-w-0" value={values.start_time ?? ""} onChange={(e) => set("start_time", e.target.value || null)} />
           </div>
           <div>
-            <label className="label" htmlFor="finish_time">
-              Finish time
-            </label>
-            <div className="flex gap-2">
-              <input id="finish_time" type="time" className="field" value={values.finish_time ?? ""} onChange={(e) => set("finish_time", e.target.value || null)} />
-              {!values.finish_time ? (
-                <button type="button" onClick={() => set("finish_time", nowHHMM())} className="btn-secondary shrink-0 px-3 text-[13px]">
-                  Now
-                </button>
-              ) : null}
+            <div className="mb-1.5 flex items-baseline justify-between">
+              <label className="text-[13px] font-semibold" htmlFor="finish_time">
+                Finish time
+              </label>
+              <button type="button" onClick={() => set("finish_time", nowHHMM())} className="min-h-6 px-1 text-[12px] font-semibold text-brand">
+                Now
+              </button>
             </div>
+            <input id="finish_time" type="time" className="field min-w-0" value={values.finish_time ?? ""} onChange={(e) => set("finish_time", e.target.value || null)} />
           </div>
         </div>
       </section>

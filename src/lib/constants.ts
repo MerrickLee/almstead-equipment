@@ -1,11 +1,18 @@
 export const APP_NAME = "Almstead Repair Orders";
 
+// Branch names match the PO (po.almstead.ai) and job-cost systems so fleet data
+// lines up across apps.
 export const BRANCHES = [
-  "New Rochelle, NY",
-  "Hawthorne, NY",
-  "Stamford, CT",
-  "North Haledon, NJ",
+  "New Rochelle",
+  "Hawthorne",
+  "Stamford",
+  "North Haledon",
+  "Nursery",
+  "Garage / Shop",
 ] as const;
+
+export const TRUCK_KINDS = ["vehicle", "equipment"] as const;
+export type TruckKind = (typeof TRUCK_KINDS)[number];
 
 export type Branch = (typeof BRANCHES)[number];
 

@@ -17,7 +17,7 @@ Mechanic (phone PWA)                     Manager (any browser)
 
 ## 1. Supabase (already done — 2026-10-27)
 
-The project exists in the **Almstead** org: **Repair Orders**, ref `bethrbtergsvtafmsgpy`, `us-east-1`, Micro compute, and both files in `supabase/migrations/` have been run (`0001_init.sql`, then `0002_service_role_grants.sql`). Together they create:
+The project exists in the **Almstead** org: **Repair Orders**, ref `bethrbtergsvtafmsgpy`, `us-east-1`, Micro compute, and the migrations in `supabase/migrations/` have been run (`0001_init.sql`, `0002_service_role_grants.sql`, `0003_trucks_fleet_fields.sql`). Together they create:
 
 - `staff` (mechanics + managers, bcrypt-hashed PINs), `trucks`, `repair_orders`, `repair_order_photos`
 - a **private** storage bucket `repair-orders` for photos and signatures
@@ -31,14 +31,14 @@ Values for `.env.local` / Vercel:
 - `SUPABASE_URL` = `https://bethrbtergsvtafmsgpy.supabase.co`
 - `SUPABASE_SERVICE_ROLE_KEY` = **Project Settings → API Keys → Secret keys → default** (`sb_secret_…`). The legacy `service_role` JWT on the "Legacy" tab works too.
 
-To recreate from scratch, run the two migration files in order in **SQL Editor → New query** on a fresh project.
+To recreate from scratch, run the migration files in order in **SQL Editor → New query** on a fresh project.
 
 ## 2. Run locally
 
 ```bash
 cp .env.example .env.local      # fill in SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SESSION_SECRET
 npm install
-npm run create-manager -- "Merrick Lee" "your-passcode" "New Rochelle, NY"
+npm run create-manager -- "Merrick Lee" "your-passcode" "New Rochelle"
 npm run dev                     # http://localhost:3000
 ```
 

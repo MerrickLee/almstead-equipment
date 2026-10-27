@@ -1,7 +1,7 @@
 // Creates the first manager account so you can sign in and add everyone else
 // from the dashboard.
 //
-//   npm run create-manager -- "Merrick Lee" "your-passcode" "New Rochelle, NY"
+//   npm run create-manager -- "Merrick Lee" "your-passcode" "New Rochelle"
 //
 // Reads SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY from .env.local.
 

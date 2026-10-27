@@ -16,6 +16,9 @@ export interface Truck {
   truck_number: string;
   description: string | null;
   branch: string | null;
+  kind: "vehicle" | "equipment";
+  asset_id: string | null; // accounting asset id from the PO system
+  source: string | null; // 'po', 'jobcost', 'jobcost+po', 'manual'
   active: boolean;
   created_at: string;
 }

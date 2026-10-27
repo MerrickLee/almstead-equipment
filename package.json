@@ -10,6 +10,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "create-manager": "node scripts/create-manager.mjs",
+    "set-passcode": "node scripts/set-passcode.mjs",
     "seed-trucks": "node scripts/seed-trucks.mjs"
   },
   "dependencies": {
