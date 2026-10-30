@@ -2,6 +2,7 @@
 
 import { Camera, ImagePlus, X } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
+import { useT } from "@/lib/i18n/client";
 import { compressImage } from "@/lib/images";
 import { MAX_PHOTOS_PER_ORDER } from "@/lib/constants";
 import type { LocalPhoto } from "@/lib/offline";
@@ -14,6 +15,7 @@ interface Props {
 
 /** Camera / gallery capture with client-side compression. Photos are kept as blobs until submit. */
 export function PhotoCapture({ photos, onChange, disabled }: Props) {
+  const t = useT();
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
 
@@ -41,12 +43,12 @@ export function PhotoCapture({ photos, onChange, disabled }: Props) {
         {photos.map((p, i) => (
           <div key={p.id} className="relative overflow-hidden rounded-xl border border-line bg-ground">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={urls[i]} alt={p.caption || `Photo ${i + 1}`} className="aspect-square w-full object-cover" />
+            <img src={urls[i]} alt={p.caption || `${t("common.photo")} ${i + 1}`} className="aspect-square w-full object-cover" />
             {!disabled ? (
               <button
                 type="button"
                 onClick={() => remove(p.id)}
-                aria-label="Remove photo"
+                aria-label={t("photos.remove")}
                 className="absolute top-1.5 right-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white"
               >
                 <X size={16} />
@@ -56,7 +58,7 @@ export function PhotoCapture({ photos, onChange, disabled }: Props) {
               type="text"
               value={p.caption}
               onChange={(e) => update(p.id, { caption: e.target.value })}
-              placeholder="Caption"
+              placeholder={t("photos.caption")}
               disabled={disabled}
               className="w-full border-t border-line bg-white px-2 py-1.5 text-[13px] outline-none"
             />
@@ -70,7 +72,7 @@ export function PhotoCapture({ photos, onChange, disabled }: Props) {
               className="flex flex-1 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-brand/40 bg-ground text-[12px] font-semibold text-brand"
             >
               <Camera size={22} />
-              Camera
+              {t("photos.camera")}
             </button>
             <button
               type="button"
@@ -78,7 +80,7 @@ export function PhotoCapture({ photos, onChange, disabled }: Props) {
               className="flex min-h-10 items-center justify-center gap-1 rounded-xl border border-line bg-white text-[12px] font-semibold text-muted"
             >
               <ImagePlus size={16} />
-              Gallery
+              {t("photos.gallery")}
             </button>
           </div>
         ) : null}
@@ -86,7 +88,7 @@ export function PhotoCapture({ photos, onChange, disabled }: Props) {
       <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => void addFiles(e.target.files).then(() => (e.target.value = ""))} />
       <input ref={galleryRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => void addFiles(e.target.files).then(() => (e.target.value = ""))} />
       <p className="mt-2 text-[12px] text-muted">
-        {photos.length} of {MAX_PHOTOS_PER_ORDER} photos. Photos are shrunk on the phone before upload.
+        {t("photos.count", { n: photos.length, max: MAX_PHOTOS_PER_ORDER })}
       </p>
     </div>
   );

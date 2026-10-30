@@ -1,4 +1,5 @@
 import { listStaff } from "@/lib/db";
+import { getT } from "@/lib/i18n/server";
 import { requireManager } from "@/lib/session";
 import { StaffManager } from "@/components/manager/StaffManager";
 
@@ -7,12 +8,13 @@ export const metadata = { title: "Mechanics & managers" };
 
 export default async function StaffPage() {
   const me = await requireManager();
+  const { t } = await getT();
   const staff = await listStaff();
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="text-[24px] font-bold tracking-tight">Mechanics &amp; managers</h1>
-        <p className="text-[13px] text-muted">Mechanics sign in with a 4–6 digit PIN; managers with a passcode of 6+ characters. Deactivated people keep their history but can&apos;t sign in.</p>
+        <h1 className="text-[24px] font-bold tracking-tight">{t("staff.title")}</h1>
+        <p className="text-[13px] text-muted">{t("staff.subtitle")}</p>
       </div>
       <StaffManager initial={staff} meId={me.id} />
     </div>

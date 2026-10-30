@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { MECHANIC_PIN_MAX } from "@/lib/constants";
 import { initials } from "@/lib/format";
+import { LangToggle, useT } from "@/lib/i18n/client";
 
 interface StaffOption {
   id: string;
@@ -20,6 +21,7 @@ const LIST_KEY = "ro:staffList";
 export function LoginClient() {
   const router = useRouter();
   const params = useSearchParams();
+  const t = useT();
   const [staff, setStaff] = useState<StaffOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -39,7 +41,7 @@ export function LoginClient() {
     fetch("/api/auth/staff-list")
       .then(async (r) => {
         const body = (await r.json()) as { staff?: StaffOption[]; error?: string };
-        if (!r.ok || !body.staff) throw new Error(body.error ?? "Could not load names");
+        if (!r.ok || !body.staff) throw new Error(t("login.err.load"));
         setStaff(body.staff);
         try {
           localStorage.setItem(LIST_KEY, JSON.stringify(body.staff));
@@ -60,6 +62,7 @@ export function LoginClient() {
   }, [staff, filter]);
 
   const isMechanic = selected?.role === "mechanic";
+  const roleLabel = (s: StaffOption) => (s.role === "manager" ? t("common.manager") : t("common.mechanic"));
 
   const submit = async () => {
     if (!selected || !passcode) return;
@@ -71,8 +74,14 @@ export function LoginClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ staffId: selected.id, passcode }),
       });
-      const body = (await res.json()) as { home?: string; error?: string };
-      if (!res.ok) throw new Error(body.error ?? "Sign-in failed");
+      const body = (await res.json()) as { home?: string; error?: string; code?: string; mins?: number; left?: number };
+      if (!res.ok) {
+        // Codes map to the viewer's language; the English message is only a fallback.
+        if (body.code === "inactive") throw new Error(t("login.err.inactive"));
+        if (body.code === "locked") throw new Error(t("login.err.locked", { mins: body.mins ?? 15 }));
+        if (body.code === "wrong") throw new Error(t("login.err.wrong", { left: body.left ?? 0 }));
+        throw new Error(body.error ?? t("login.err.failed"));
+      }
       try {
         localStorage.setItem(LAST_KEY, selected.id);
       } catch {
@@ -102,10 +111,13 @@ export function LoginClient() {
   };
 
   return (
-    <main className="safe-top safe-bottom mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pt-10">
+    <main className="safe-top safe-bottom mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pt-6">
+      <div className="flex justify-end">
+        <LangToggle />
+      </div>
       <div className="mb-6 flex flex-col items-center gap-3">
         <Image src="/logo-horizontal.png" alt="Almstead Tree, Shrub & Lawn Care" width={260} height={60} priority className="h-auto w-[260px]" />
-        <h1 className="text-[22px] font-bold tracking-tight">Repair Orders</h1>
+        <h1 className="text-[22px] font-bold tracking-tight">{t("app.name")}</h1>
       </div>
 
       {!selected ? (
@@ -117,19 +129,19 @@ export function LoginClient() {
                 type="search"
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                placeholder="Find your name"
+                placeholder={t("login.findName")}
                 className="field pl-10"
                 autoComplete="off"
-                aria-label="Find your name"
+                aria-label={t("login.findName")}
               />
             </div>
           </div>
           {loading && staff.length === 0 ? (
-            <p className="p-6 text-center text-[14px] text-muted">Loading names…</p>
+            <p className="p-6 text-center text-[14px] text-muted">{t("login.loading")}</p>
           ) : loadError && staff.length === 0 ? (
             <p className="p-6 text-center text-[14px] text-danger">{loadError}</p>
           ) : visible.length === 0 ? (
-            <p className="p-6 text-center text-[14px] text-muted">No one by that name. Ask your manager to add you.</p>
+            <p className="p-6 text-center text-[14px] text-muted">{t("login.noMatch")}</p>
           ) : (
             <ul className="max-h-[60dvh] overflow-y-auto">
               {visible.map((s) => (
@@ -147,7 +159,7 @@ export function LoginClient() {
                     <span className="flex min-w-0 flex-col">
                       <span className="text-[15px] font-semibold">{s.full_name}</span>
                       <span className="text-[12px] text-muted">
-                        {s.role === "manager" ? "Manager" : "Mechanic"}
+                        {roleLabel(s)}
                         {s.branch ? ` · ${s.branch}` : ""}
                       </span>
                     </span>
@@ -164,7 +176,7 @@ export function LoginClient() {
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="text-[15px] font-semibold">{selected.full_name}</span>
               <span className="text-[12px] text-muted">
-                {selected.role === "manager" ? "Manager" : "Mechanic"}
+                {roleLabel(selected)}
                 {selected.branch ? ` · ${selected.branch}` : ""}
               </span>
             </span>
@@ -177,14 +189,14 @@ export function LoginClient() {
               }}
               className="min-h-10 px-2 text-[13px] font-semibold text-brand"
             >
-              Change
+              {t("common.change")}
             </button>
           </div>
 
           {isMechanic ? (
             <>
-              <p className="mb-3 text-center text-[14px] text-muted">Enter your PIN</p>
-              <div className="mb-6 flex justify-center gap-3.5" aria-live="polite" aria-label={`${passcode.length} digits entered`}>
+              <p className="mb-3 text-center text-[14px] text-muted">{t("login.enterPin")}</p>
+              <div className="mb-6 flex justify-center gap-3.5" aria-live="polite" aria-label={t("login.digitsEntered", { n: passcode.length })}>
                 {Array.from({ length: MECHANIC_PIN_MAX }).map((_, i) => (
                   <span key={i} className={`h-4 w-4 rounded-full ${i < passcode.length ? "bg-brand" : "border-2 border-line"}`} />
                 ))}
@@ -196,12 +208,12 @@ export function LoginClient() {
                   </button>
                 ))}
                 <button type="button" onClick={() => submit()} disabled={busy || passcode.length < 4} className="h-16 rounded-2xl text-[14px] font-semibold text-brand disabled:opacity-40">
-                  Go
+                  {t("login.go")}
                 </button>
                 <button type="button" onClick={() => press("0")} className="h-16 rounded-2xl border border-line bg-white text-[24px] font-semibold active:bg-ground">
                   0
                 </button>
-                <button type="button" onClick={() => setPasscode((p) => p.slice(0, -1))} aria-label="Delete last digit" className="flex h-16 items-center justify-center rounded-2xl border border-line bg-white active:bg-ground">
+                <button type="button" onClick={() => setPasscode((p) => p.slice(0, -1))} aria-label={t("login.deleteDigit")} className="flex h-16 items-center justify-center rounded-2xl border border-line bg-white active:bg-ground">
                   <Delete size={26} />
                 </button>
               </div>
@@ -215,21 +227,21 @@ export function LoginClient() {
               className="flex flex-col gap-3"
             >
               <label className="label" htmlFor="passcode">
-                Passcode
+                {t("login.passcode")}
               </label>
               <input id="passcode" type="password" value={passcode} onChange={(e) => setPasscode(e.target.value)} className="field" autoComplete="current-password" autoFocus />
               <button type="submit" disabled={busy || !passcode} className="btn-primary mt-2">
-                {busy ? "Signing in…" : "Sign in"}
+                {busy ? t("login.signingIn") : t("login.signIn")}
               </button>
             </form>
           )}
 
           {error ? <p className="mt-2 text-center text-[14px] font-medium text-danger">{error}</p> : null}
-          {busy && isMechanic ? <p className="mt-2 text-center text-[14px] text-muted">Signing in…</p> : null}
+          {busy && isMechanic ? <p className="mt-2 text-center text-[14px] text-muted">{t("login.signingIn")}</p> : null}
         </section>
       )}
 
-      <p className="mt-6 text-center text-[12px] text-muted">Forgot your PIN? Ask your manager to reset it.</p>
+      <p className="mt-6 text-center text-[12px] text-muted">{t("login.forgot")}</p>
     </main>
   );
 }

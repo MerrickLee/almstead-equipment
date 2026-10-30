@@ -4,9 +4,12 @@ import React from "react";
 import { NextResponse } from "next/server";
 import { renderToBuffer, type DocumentProps } from "@react-pdf/renderer";
 import { formatOrderNumber } from "@/lib/constants";
-import { downloadFromStorage, getOrder } from "@/lib/db";
+import { downloadFromStorage } from "@/lib/db";
+import { isLang } from "@/lib/i18n";
+import { getLang } from "@/lib/i18n/server";
 import { RepairOrderPdf, type PdfAssets } from "@/lib/pdf/RepairOrderPdf";
 import { apiSession } from "@/lib/session";
+import { getOrderTranslated } from "@/lib/translate";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -37,7 +40,7 @@ export async function GET(request: Request, { params }: Ctx) {
   if (error) return error;
   const { id } = await params;
 
-  const order = await getOrder(id);
+  const order = await getOrderTranslated(id);
   if (!order || (user.role !== "manager" && order.mechanic_id !== user.id)) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -56,11 +59,15 @@ export async function GET(request: Request, { params }: Ctx) {
       .filter((p): p is { dataUrl: string; caption: string | null } => p !== null),
   };
 
+  const params_ = new URL(request.url).searchParams;
+  const requested = params_.get("lang");
+  const lang = isLang(requested) ? requested : await getLang();
+
   try {
-    const element = React.createElement(RepairOrderPdf, { order, assets }) as unknown as React.ReactElement<DocumentProps>;
+    const element = React.createElement(RepairOrderPdf, { order, assets, lang }) as unknown as React.ReactElement<DocumentProps>;
     const pdf = await renderToBuffer(element);
-    const filename = `${formatOrderNumber(order.order_number)}-${order.work_date}.pdf`;
-    const download = new URL(request.url).searchParams.get("download") === "1";
+    const filename = `${formatOrderNumber(order.order_number)}-${order.work_date}${lang === "es" ? "-es" : ""}.pdf`;
+    const download = params_.get("download") === "1";
     return new NextResponse(new Uint8Array(pdf), {
       headers: {
         "Content-Type": "application/pdf",

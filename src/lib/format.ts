@@ -1,14 +1,19 @@
-// Display helpers shared by server and client components.
+// Display helpers shared by server and client components. Pass a locale
+// ("en-US" | "es-US") for anything a Spanish-speaking viewer will read.
 
-export function fmtDate(d: string | null | undefined, opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" }): string {
+export function fmtDate(
+  d: string | null | undefined,
+  opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" },
+  locale = "en-US",
+): string {
   if (!d) return "";
   const [y, m, day] = d.slice(0, 10).split("-").map(Number);
-  return new Date(y, m - 1, day).toLocaleDateString("en-US", opts);
+  return new Date(y, m - 1, day).toLocaleDateString(locale, opts);
 }
 
-export function fmtDateTime(iso: string | null | undefined): string {
+export function fmtDateTime(iso: string | null | undefined, locale = "en-US"): string {
   if (!iso) return "";
-  return new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
+  return new Date(iso).toLocaleString(locale, { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
 export function fmtTime(t: string | null | undefined): string {
@@ -24,6 +29,11 @@ export function fmtTravel(min: number | null | undefined): string {
   const h = Math.floor(min / 60);
   const m = min % 60;
   return h ? `${h}h ${m}m` : `${m} min`;
+}
+
+export function fmtNumber(n: number | null | undefined, locale = "en-US"): string {
+  if (n === null || n === undefined) return "";
+  return n.toLocaleString(locale);
 }
 
 export function todayISO(): string {

@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { getOrder, setOrderReview } from "@/lib/db";
 import { apiSession } from "@/lib/session";
+import { ensureTranslations } from "@/lib/translate";
 import { firstIssue, reviewSchema } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,7 @@ export async function POST(request: Request, { params }: Ctx) {
 
   try {
     const order = await setOrderReview(id, user.id, parsed.data.status, parsed.data.manager_notes);
+    after(() => ensureTranslations(order));
     return NextResponse.json({ order });
   } catch (err) {
     return NextResponse.json({ error: (err as Error).message }, { status: 400 });

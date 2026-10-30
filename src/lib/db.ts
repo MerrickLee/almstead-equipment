@@ -20,7 +20,7 @@ const ORDER_SELECT = `
 // ---------------------------------------------------------------------------
 // Staff
 // ---------------------------------------------------------------------------
-const STAFF_COLUMNS = "id, full_name, role, branch, active, last_login_at, created_at";
+const STAFF_COLUMNS = "id, full_name, role, branch, language, active, last_login_at, created_at";
 
 export async function listStaff(opts?: { activeOnly?: boolean }): Promise<Staff[]> {
   let q = supabase().from("staff").select(STAFF_COLUMNS).order("full_name");
@@ -39,12 +39,12 @@ export async function getStaff(id: string): Promise<Staff | null> {
 export async function getStaffForLogin(id: string) {
   const { data, error } = await supabase()
     .from("staff")
-    .select("id, full_name, role, branch, active, passcode_hash, failed_attempts, locked_until")
+    .select("id, full_name, role, branch, language, active, passcode_hash, failed_attempts, locked_until")
     .eq("id", id)
     .maybeSingle();
   if (error) throw error;
   return data as
-    | (Pick<Staff, "id" | "full_name" | "role" | "branch" | "active"> & {
+    | (Pick<Staff, "id" | "full_name" | "role" | "branch" | "language" | "active"> & {
         passcode_hash: string;
         failed_attempts: number;
         locked_until: string | null;
@@ -69,6 +69,7 @@ export async function createStaff(input: {
   full_name: string;
   role: Staff["role"];
   branch: string | null;
+  language?: Staff["language"];
   passcode_hash: string;
 }): Promise<Staff> {
   const { data, error } = await supabase().from("staff").insert(input).select(STAFF_COLUMNS).single();
@@ -82,6 +83,7 @@ export async function updateStaff(
     full_name: string;
     role: Staff["role"];
     branch: string | null;
+    language: Staff["language"];
     passcode_hash: string;
     active: boolean;
     failed_attempts: number;

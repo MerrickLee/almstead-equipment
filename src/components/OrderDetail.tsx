@@ -1,5 +1,11 @@
-import { fmtDate, fmtDateTime, fmtTime, fmtTravel } from "@/lib/format";
+"use client";
+
+import { fmtDate, fmtDateTime, fmtNumber, fmtTime, fmtTravel, unitLabel } from "@/lib/format";
+import { localeOf } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n/client";
+import { textFor } from "@/lib/i18n/content";
 import type { RepairOrderWithNames } from "@/lib/types";
+import { TranslatedText } from "@/components/TranslatedText";
 
 function Field({ label, value }: { label: string; value: string | number | null | undefined }) {
   return (
@@ -10,53 +16,55 @@ function Field({ label, value }: { label: string; value: string | number | null 
   );
 }
 
-function TextBlock({ label, value }: { label: string; value: string | null }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <span className="section-title">{label}</span>
-      <p className="text-[14px] leading-relaxed whitespace-pre-line">{value || <span className="text-muted">—</span>}</p>
-    </div>
-  );
-}
-
 export function fileUrl(path: string): string {
   return `/api/files?path=${encodeURIComponent(path)}`;
 }
 
-/** Read-only rendering of an order; used by both the mechanic and manager detail pages. */
+/** Read-only rendering of an order in the viewer's language; used by both the mechanic and manager detail pages. */
 export function OrderDetail({ order, dense }: { order: RepairOrderWithNames; dense?: boolean }) {
+  const { lang, t } = useLang();
+  const locale = localeOf(lang);
   const photos = order.photos ?? [];
   return (
     <div className="flex flex-col gap-4">
       <section className={`card grid gap-4 p-4 ${dense ? "grid-cols-2" : "grid-cols-2 md:grid-cols-4"}`}>
-        <Field label="Mechanic" value={order.mechanic?.full_name} />
-        <Field label="Date" value={fmtDate(order.work_date)} />
-        <Field label="Truck #" value={order.truck_number} />
-        <Field label="Branch" value={order.branch} />
-        <Field label="Location" value={order.location} />
-        <Field label="Mileage" value={order.mileage !== null ? order.mileage.toLocaleString("en-US") : null} />
-        <Field label="Travel time" value={fmtTravel(order.travel_time_minutes)} />
-        <Field label="Total hours" value={order.total_hours !== null ? String(order.total_hours) : null} />
-        <Field label="Start" value={fmtTime(order.start_time)} />
-        <Field label="Finish" value={fmtTime(order.finish_time)} />
+        <Field label={t("form.mechanic")} value={order.mechanic?.full_name} />
+        <Field label={t("form.date")} value={fmtDate(order.work_date, undefined, locale)} />
+        <Field label={t("mgr.col.truck")} value={unitLabel(order.truck_number)} />
+        <Field label={t("form.branch")} value={order.branch} />
+        <Field label={t("form.location")} value={textFor(order, "location", lang)} />
+        <Field label={t("form.mileage")} value={order.mileage !== null ? fmtNumber(order.mileage, locale) : null} />
+        <Field label={t("form.totalHours")} value={order.total_hours !== null ? String(order.total_hours) : null} />
+        {order.travel_time_minutes !== null ? <Field label={t("detail.travelTime")} value={fmtTravel(order.travel_time_minutes)} /> : null}
+        {order.start_time ? <Field label={t("detail.start")} value={fmtTime(order.start_time)} /> : null}
+        {order.finish_time ? <Field label={t("detail.finish")} value={fmtTime(order.finish_time)} /> : null}
       </section>
 
       <section className="card flex flex-col gap-4 p-4">
-        <TextBlock label="Summary description of work" value={order.summary} />
-        <TextBlock label="Work performed" value={order.work_performed} />
-        <TextBlock label="Parts / materials used" value={order.parts_materials} />
+        <div className="flex flex-col gap-1.5">
+          <span className="section-title">{t("form.summary")}</span>
+          <TranslatedText order={order} field="summary" />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <span className="section-title">{t("form.workPerformed")}</span>
+          <TranslatedText order={order} field="work_performed" />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <span className="section-title">{t("form.parts")}</span>
+          <TranslatedText order={order} field="parts_materials" />
+        </div>
       </section>
 
       <section className="card flex flex-col gap-3 p-4">
-        <span className="section-title">Photos ({photos.length})</span>
+        <span className="section-title">{t("detail.photos", { n: photos.length })}</span>
         {photos.length === 0 ? (
-          <p className="text-[14px] text-muted">No photos attached.</p>
+          <p className="text-[14px] text-muted">{t("detail.noPhotos")}</p>
         ) : (
           <div className={`grid gap-3 ${dense ? "grid-cols-3" : "grid-cols-3 md:grid-cols-4"}`}>
             {photos.map((p) => (
               <a key={p.id} href={fileUrl(p.storage_path)} target="_blank" rel="noopener" className="relative block overflow-hidden rounded-xl border border-line bg-ground">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={fileUrl(p.storage_path)} alt={p.caption ?? "Repair photo"} className="aspect-[4/3] w-full object-cover" loading="lazy" />
+                <img src={fileUrl(p.storage_path)} alt={p.caption ?? t("common.photo")} className="aspect-[4/3] w-full object-cover" loading="lazy" />
                 {p.caption ? <span className="absolute inset-x-0 bottom-0 bg-black/50 px-2 py-1 text-[11px] text-white">{p.caption}</span> : null}
               </a>
             ))}
@@ -65,31 +73,31 @@ export function OrderDetail({ order, dense }: { order: RepairOrderWithNames; den
       </section>
 
       <section className="card flex flex-col gap-2 p-4">
-        <span className="section-title">Signature</span>
+        <span className="section-title">{t("form.signature")}</span>
         {order.signature_path ? (
           <>
             <div className="overflow-hidden rounded-xl border border-line bg-white">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={fileUrl(order.signature_path)} alt={`Signature of ${order.mechanic?.full_name ?? "mechanic"}`} className="mx-auto block h-28 object-contain" />
+              <img src={fileUrl(order.signature_path)} alt={order.mechanic?.full_name ?? t("form.signature")} className="mx-auto block h-28 object-contain" />
             </div>
             <span className="text-[12px] text-muted">
-              {order.mechanic?.full_name} · {fmtDateTime(order.submitted_at)}
+              {order.mechanic?.full_name} · {fmtDateTime(order.submitted_at, locale)}
             </span>
           </>
         ) : (
-          <p className="text-[14px] text-muted">Not signed.</p>
+          <p className="text-[14px] text-muted">{t("detail.notSigned")}</p>
         )}
       </section>
 
       {order.status === "reviewed" || order.manager_notes ? (
         <section className="card flex flex-col gap-1.5 border-brand/40 bg-brand-light/40 p-4">
-          <span className="section-title">Manager review</span>
+          <span className="section-title">{t("detail.managerReview")}</span>
           {order.status === "reviewed" ? (
             <span className="text-[13px] text-muted">
-              Reviewed by {order.reviewer?.full_name ?? "manager"} · {fmtDateTime(order.reviewed_at)}
+              {t("detail.reviewedBy", { name: order.reviewer?.full_name ?? t("common.manager") })} · {fmtDateTime(order.reviewed_at, locale)}
             </span>
           ) : null}
-          {order.manager_notes ? <p className="text-[14px] leading-relaxed whitespace-pre-line">{order.manager_notes}</p> : null}
+          {order.manager_notes ? <TranslatedText order={order} field="manager_notes" /> : null}
         </section>
       ) : null}
     </div>

@@ -3,15 +3,16 @@
 import { FileText, Truck, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const items = [
-  { href: "/manager", label: "Orders", icon: FileText, match: (p: string) => p === "/manager" || p.startsWith("/manager/orders") },
-  { href: "/manager/trucks", label: "Trucks", icon: Truck, match: (p: string) => p.startsWith("/manager/trucks") },
-  { href: "/manager/staff", label: "Mechanics & managers", icon: Users, match: (p: string) => p.startsWith("/manager/staff") },
-];
+import { useT } from "@/lib/i18n/client";
 
 export function ManagerNav() {
   const path = usePathname();
+  const t = useT();
+  const items = [
+    { href: "/manager", label: t("mgr.nav.orders"), icon: FileText, match: (p: string) => p === "/manager" || p.startsWith("/manager/orders") },
+    { href: "/manager/trucks", label: t("mgr.nav.trucks"), icon: Truck, match: (p: string) => p.startsWith("/manager/trucks") },
+    { href: "/manager/staff", label: t("mgr.nav.staff"), icon: Users, match: (p: string) => p.startsWith("/manager/staff") },
+  ];
   return (
     <nav className="flex gap-1 overflow-x-auto md:flex-col">
       {items.map(({ href, label, icon: Icon, match }) => {

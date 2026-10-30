@@ -2,10 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useT } from "@/lib/i18n/client";
 import type { OrderStatus } from "@/lib/types";
 
 export function ReviewPanel({ orderId, status, notes }: { orderId: string; status: OrderStatus; notes: string | null }) {
   const router = useRouter();
+  const t = useT();
   const [text, setText] = useState(notes ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +31,7 @@ export function ReviewPanel({ orderId, status, notes }: { orderId: string; statu
   };
 
   const remove = async () => {
-    if (!confirm("Delete this repair order and its photos? This cannot be undone.")) return;
+    if (!confirm(t("review.deleteConfirm"))) return;
     setBusy(true);
     try {
       const res = await fetch(`/api/orders/${orderId}`, { method: "DELETE" });
@@ -44,36 +46,36 @@ export function ReviewPanel({ orderId, status, notes }: { orderId: string; statu
 
   return (
     <section className="card flex flex-col gap-3 border-2 border-brand p-4">
-      <span className="section-title">Manager review</span>
+      <span className="section-title">{t("detail.managerReview")}</span>
       <label className="label" htmlFor="notes">
-        Notes (optional)
+        {t("review.notes")}
       </label>
-      <textarea id="notes" className="field" rows={4} value={text} onChange={(e) => setText(e.target.value)} placeholder="Approve parts cost, flag follow-up, note warranty claim…" />
+      <textarea id="notes" className="field" rows={4} value={text} onChange={(e) => setText(e.target.value)} placeholder={t("review.notesHint")} />
       {error ? <p className="text-[13px] font-medium text-danger">{error}</p> : null}
       {status === "reviewed" ? (
         <>
           <button type="button" onClick={() => void save("reviewed")} disabled={busy} className="btn-secondary">
-            Save notes
+            {t("review.saveNotes")}
           </button>
           <button type="button" onClick={() => void save("submitted")} disabled={busy} className="btn-secondary">
-            Reopen for the mechanic
+            {t("review.reopen")}
           </button>
         </>
       ) : (
         <>
           <button type="button" onClick={() => void save("reviewed")} disabled={busy} className="btn-primary">
-            {busy ? "Saving…" : "Mark as reviewed"}
+            {busy ? t("common.saving") : t("review.markReviewed")}
           </button>
-          <span className="text-[12px] text-muted">Locks the order for the mechanic. You can reopen it later.</span>
+          <span className="text-[12px] text-muted">{t("review.locksHint")}</span>
           {text !== (notes ?? "") ? (
             <button type="button" onClick={() => void save("submitted")} disabled={busy} className="text-[13px] font-semibold text-brand">
-              Save notes without reviewing
+              {t("review.saveNotesOnly")}
             </button>
           ) : null}
         </>
       )}
       <button type="button" onClick={() => void remove()} disabled={busy} className="mt-2 text-[12px] font-semibold text-danger">
-        Delete this order
+        {t("review.delete")}
       </button>
     </section>
   );

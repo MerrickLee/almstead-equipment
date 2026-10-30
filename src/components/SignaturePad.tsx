@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useT } from "@/lib/i18n/client";
 
 interface Props {
   value: string | null; // PNG data URL
@@ -10,6 +11,7 @@ interface Props {
 
 /** Finger/stylus signature capture on a canvas. Emits a PNG data URL on each stroke end. */
 export function SignaturePad({ value, onChange, disabled }: Props) {
+  const t = useT();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
   const last = useRef<{ x: number; y: number } | null>(null);
@@ -99,19 +101,19 @@ export function SignaturePad({ value, onChange, disabled }: Props) {
           onPointerUp={onUp}
           onPointerCancel={onUp}
           onPointerLeave={onUp}
-          aria-label="Signature area"
+          aria-label={t("sig.area")}
         />
         <div className="pointer-events-none absolute inset-x-6 bottom-7 border-t border-dashed border-line" />
         {!hasInk && !disabled ? (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-[14px] text-muted">
-            Sign here with your finger
+            {t("sig.hint")}
           </div>
         ) : null}
       </div>
       {!disabled ? (
         <div className="mt-2 flex justify-end">
           <button type="button" onClick={clear} className="min-h-10 px-2 text-[13px] font-semibold text-brand">
-            Clear
+            {t("common.clear")}
           </button>
         </div>
       ) : null}

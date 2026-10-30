@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { listOrders } from "@/lib/db";
+import { getT } from "@/lib/i18n/server";
 import { requireSession } from "@/lib/session";
 import { OrderCard } from "@/components/mechanic/OrderCard";
 import { PendingOrders } from "@/components/mechanic/PendingOrders";
@@ -9,6 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function MechanicHome() {
   const user = await requireSession();
+  const { t } = await getT();
   let orders: Awaited<ReturnType<typeof listOrders>>["orders"] = [];
   let loadError: string | null = null;
   try {
@@ -24,24 +26,26 @@ export default async function MechanicHome() {
           <Plus size={26} strokeWidth={2.4} />
         </span>
         <span className="flex flex-col">
-          <span className="text-[18px] font-bold">New Repair Order</span>
-          <span className="text-[13px] opacity-90">Starts a fresh sheet for today</span>
+          <span className="text-[18px] font-bold">{t("home.newOrder")}</span>
+          <span className="text-[13px] opacity-90">{t("home.newOrderHint")}</span>
         </span>
       </Link>
 
       <PendingOrders />
 
       <div className="mt-1 flex items-baseline justify-between">
-        <h2 className="text-[15px] font-bold">My recent orders</h2>
+        <h2 className="text-[15px] font-bold">{t("home.recent")}</h2>
         <Link href="/app/orders" className="text-[13px] font-semibold text-brand">
-          See all
+          {t("common.seeAll")}
         </Link>
       </div>
 
       {loadError ? (
-        <p className="card p-4 text-[14px] text-muted">Couldn&apos;t load your orders right now. {loadError}</p>
+        <p className="card p-4 text-[14px] text-muted">
+          {t("home.loadError")} {loadError}
+        </p>
       ) : orders.length === 0 ? (
-        <p className="card p-4 text-[14px] text-muted">No repair orders yet. Tap New Repair Order to start one.</p>
+        <p className="card p-4 text-[14px] text-muted">{t("home.none")}</p>
       ) : (
         <div className="flex flex-col gap-2.5">
           {orders.map((o) => (

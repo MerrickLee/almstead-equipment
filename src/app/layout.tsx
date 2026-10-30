@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { APP_NAME } from "@/lib/constants";
+import { LangProvider } from "@/lib/i18n/client";
+import { getLang } from "@/lib/i18n/server";
 import { ServiceWorker } from "@/components/ServiceWorker";
 
 export const metadata: Metadata = {
@@ -23,11 +25,12 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const lang = await getLang();
   return (
-    <html lang="en">
+    <html lang={lang}>
       <body className="min-h-dvh antialiased">
-        {children}
+        <LangProvider initialLang={lang}>{children}</LangProvider>
         <ServiceWorker />
       </body>
     </html>

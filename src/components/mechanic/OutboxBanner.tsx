@@ -3,6 +3,7 @@
 import { CloudUpload, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { useT } from "@/lib/i18n/client";
 import { flushOutbox, loadOutbox } from "@/lib/offline";
 
 /**
@@ -11,6 +12,7 @@ import { flushOutbox, loadOutbox } from "@/lib/offline";
  */
 export function OutboxBanner() {
   const router = useRouter();
+  const t = useT();
   const [pending, setPending] = useState(0);
   const [syncing, setSyncing] = useState(false);
   const [online, setOnline] = useState(true);
@@ -57,7 +59,7 @@ export function OutboxBanner() {
   }, []);
 
   if (!online && pending === 0) {
-    return <div className="bg-sun-light px-4 py-2 text-center text-[13px] font-medium text-sun-dark">No signal — you can keep working; orders will upload later.</div>;
+    return <div className="bg-sun-light px-4 py-2 text-center text-[13px] font-medium text-sun-dark">{t("outbox.noSignal")}</div>;
   }
   if (pending === 0) return null;
 
@@ -65,14 +67,12 @@ export function OutboxBanner() {
     <div className="flex items-center gap-3 bg-sun-light px-4 py-2.5 text-[13px] text-sun-dark">
       <CloudUpload size={18} className="shrink-0" />
       <span className="flex-1">
-        <strong>
-          {pending} order{pending === 1 ? "" : "s"} waiting to upload
-        </strong>
-        {syncing ? " — sending…" : online ? (lastError ? ` — ${lastError}` : "") : " — will send when you have signal."}
+        <strong>{pending === 1 ? t("outbox.waiting", { n: pending }) : t("outbox.waitingPlural", { n: pending })}</strong>
+        {syncing ? ` — ${t("outbox.sending")}` : online ? (lastError ? ` — ${lastError}` : "") : ` — ${t("outbox.willSend")}`}
       </span>
       {online && !syncing ? (
         <button type="button" onClick={() => void sync()} className="flex min-h-9 items-center gap-1 rounded-lg px-2 font-semibold">
-          <RefreshCw size={14} /> Retry
+          <RefreshCw size={14} /> {t("outbox.retry")}
         </button>
       ) : null}
     </div>

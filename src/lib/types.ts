@@ -6,6 +6,7 @@ export interface Staff {
   full_name: string;
   role: StaffRole;
   branch: string | null;
+  language: "en" | "es" | null;
   active: boolean;
   last_login_at: string | null;
   created_at: string;
@@ -46,10 +47,23 @@ export interface RepairOrder {
   reviewed_by: string | null;
   reviewed_at: string | null;
   manager_notes: string | null;
+  translations: OrderTranslations | null;
   submitted_at: string;
   created_at: string;
   updated_at: string;
 }
+
+/** Free-text fields that get translated between English and Spanish. */
+export const TRANSLATED_FIELDS = ["summary", "work_performed", "parts_materials", "location", "manager_notes"] as const;
+export type TranslatedField = (typeof TRANSLATED_FIELDS)[number];
+
+/** One field's translation record: the language it was written in, plus the text in each language. */
+export interface FieldTranslation {
+  src: "en" | "es";
+  en?: string;
+  es?: string;
+}
+export type OrderTranslations = Partial<Record<TranslatedField, FieldTranslation>>;
 
 export interface RepairOrderPhoto {
   id: string;
@@ -72,6 +86,7 @@ export interface SessionUser {
   name: string;
   role: StaffRole;
   branch: string | null;
+  language?: "en" | "es" | null;
 }
 
 /** What the phone sends when creating or updating an order. */

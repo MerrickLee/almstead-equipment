@@ -26,6 +26,7 @@ export async function POST(request: Request) {
       full_name: parsed.data.full_name,
       role: parsed.data.role,
       branch: parsed.data.branch,
+      language: parsed.data.language ?? null,
       passcode_hash: await bcrypt.hash(parsed.data.passcode, 10),
     });
     return NextResponse.json({ staff }, { status: 201 });

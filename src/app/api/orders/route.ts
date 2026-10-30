@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { listOrders, upsertOrder } from "@/lib/db";
 import { apiSession } from "@/lib/session";
+import { ensureTranslations } from "@/lib/translate";
 import { firstIssue, repairOrderInputSchema } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +45,8 @@ export async function POST(request: Request) {
 
   try {
     const order = await upsertOrder(user.id, parsed.data);
+    // Translate after the phone has its answer, so a slow or failed translation never blocks a submit.
+    after(() => ensureTranslations(order));
     return NextResponse.json({ order }, { status: 201 });
   } catch (err) {
     return NextResponse.json({ error: (err as Error).message }, { status: 400 });

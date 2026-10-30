@@ -17,12 +17,13 @@ Mechanic (phone PWA)                     Manager (any browser)
 
 ## 1. Supabase (already done — 2026-10-27)
 
-The project exists in the **Almstead** org: **Repair Orders**, ref `bethrbtergsvtafmsgpy`, `us-east-1`, Micro compute, and the migrations in `supabase/migrations/` have been run (`0001_init.sql`, `0002_service_role_grants.sql`, `0003_trucks_fleet_fields.sql`). Together they create:
+The project exists in the **Almstead** org: **Repair Orders**, ref `bethrbtergsvtafmsgpy`, `us-east-1`, Micro compute, and the migrations in `supabase/migrations/` have been run (`0001_init.sql`, `0002_service_role_grants.sql`, `0003_trucks_fleet_fields.sql`, `0004_i18n.sql`). Together they create:
 
 - `staff` (mechanics + managers, bcrypt-hashed PINs), `trucks`, `repair_orders`, `repair_order_photos`
 - a **private** storage bucket `repair-orders` for photos and signatures
 - Row Level Security on every table with no policies — only the app's service-role key can read anything
-- explicit grants for `service_role` (needed because the project was created with "Automatically expose new tables" off).
+- explicit grants for `service_role` (needed because the project was created with "Automatically expose new tables" off)
+- `staff.language` (preferred language) and `repair_orders.translations` (English ⇄ Spanish machine translations of the free-text fields).
 
 **Hosting:** Vercel project `almstead-repair-orders` (team "merrick lee's projects", managed from the merricklee@me.com login) → https://almstead-repair-orders.vercel.app, deploying from `main` on GitHub `MerrickLee/almstead-equipment`.
 
@@ -30,6 +31,7 @@ Values for `.env.local` / Vercel:
 
 - `SUPABASE_URL` = `https://bethrbtergsvtafmsgpy.supabase.co`
 - `SUPABASE_SERVICE_ROLE_KEY` = **Project Settings → API Keys → Secret keys → default** (`sb_secret_…`). The legacy `service_role` JWT on the "Legacy" tab works too.
+- `ANTHROPIC_API_KEY` = a key from https://console.anthropic.com (used only server-side to translate what people type between English and Spanish). Without it the app still works in both languages, but typed text stays as written.
 
 To recreate from scratch, run the migration files in order in **SQL Editor → New query** on a fresh project.
 
@@ -49,7 +51,7 @@ Sign in at `/login` as the manager you just created, then add mechanics and truc
 ## 3. Deploy to Vercel
 
 1. Push this folder to a GitHub repo and import it in Vercel (framework preset: Next.js, no build changes needed).
-2. Add the three environment variables from `.env.example` (Production + Preview).
+2. Add the environment variables from `.env.example` (Production + Preview): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SESSION_SECRET`, `ANTHROPIC_API_KEY`.
 3. Add the domain, e.g. `repairs.almstead.ai`.
 
 Nothing Supabase-related is exposed to the browser: there are no `NEXT_PUBLIC_` variables, and the service-role key is only used in server code (`src/lib/supabase.ts`).
@@ -71,7 +73,12 @@ It opens full-screen like a native app, stays signed in for 30 days, and keeps w
 Everyone picks their name from a list and enters a passcode. Mechanics use a 4–6 digit PIN (numeric keypad, auto-submits at 6 digits); managers use a passcode of 6+ characters. Five wrong attempts lock the account for 15 minutes. Sessions are signed JWTs (`jose`, HS256) in an `httpOnly` cookie; `src/proxy.ts` checks it on every request and keeps mechanics out of `/manager`. Managers create accounts and reset PINs from **Mechanics & managers** — PINs are never shown again after being set.
 
 ### The repair order form
-Mirrors the paper sheet field-for-field: mechanic (auto), date (defaults to today), truck # (picker from the master list, or free text), branch, location, mileage, total travel time, total hours (with a "use start/finish" shortcut), summary, work performed, parts/materials, start and finish times, up to 12 photos (camera or gallery, shrunk on the phone to ~250 KB each), and a finger-drawn signature.
+Mirrors the paper sheet: mechanic (auto), date (defaults to today), truck # (picker from the master list, or free text), branch, location, mileage, total hours, summary, work performed, parts/materials, up to 12 photos (camera or gallery, shrunk on the phone to ~250 KB each), and a finger-drawn signature. (Travel time and start/finish were dropped from the form on Rich's feedback; older orders that have them still show and print them.)
+
+### English / Spanish
+- Every screen, button, error and the PDF exist in both languages (`src/lib/i18n/dictionary.ts`). The **EN | ES** toggle (login screen, mechanic header, manager sidebar) switches instantly; the choice is kept in a cookie and, once signed in, on the person's account, so it follows them to any phone. Managers can also set someone's preferred language on **Mechanics & managers**.
+- What people *type* is translated too. The mechanic writes summary / work / parts / location in whichever language they prefer; the server detects the language and stores a translation in the other one (`repair_orders.translations`, via Claude Haiku — `src/lib/translate.ts`). A Spanish-speaking mechanic and an English-speaking manager each see the order in their own language, with a **"Translated from Spanish · See original"** link; manager notes go the other way. The PDF and the CSV export come out in the viewer's language with the original text underneath / in a second column.
+- Translation runs right after a save (it never delays the mechanic's submit) and retries lazily the next time the order is opened. If the API key is missing or the call fails, the reader sees the text as written with a "not translated yet" note — nothing is ever lost, because the original is always what's stored in the main columns.
 
 ### Offline
 - The service worker (`public/sw.js`) caches the app shell, so the app opens with no signal.

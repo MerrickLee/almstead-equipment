@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { formatOrderNumber } from "@/lib/constants";
 import { getOrder, listTrucks } from "@/lib/db";
+import { getT } from "@/lib/i18n/server";
 import { requireSession } from "@/lib/session";
 import type { RepairOrderInput } from "@/lib/types";
 import { RepairOrderForm } from "@/components/mechanic/RepairOrderForm";
@@ -12,6 +13,7 @@ export const metadata = { title: "Edit repair order" };
 
 export default async function EditOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireSession();
+  const { t } = await getT();
   const { id } = await params;
   const order = await getOrder(id);
   if (!order || (user.role !== "manager" && order.mechanic_id !== user.id)) notFound();
@@ -40,7 +42,7 @@ export default async function EditOrderPage({ params }: { params: Promise<{ id: 
       <Link href={`/app/orders/${id}`} className="flex w-fit items-center gap-1 text-[13px] font-semibold text-brand">
         <ChevronLeft size={16} /> {formatOrderNumber(order.order_number)}
       </Link>
-      <h1 className="text-[20px] font-bold">Edit {formatOrderNumber(order.order_number)}</h1>
+      <h1 className="text-[20px] font-bold">{t("form.editTitle", { order: formatOrderNumber(order.order_number) })}</h1>
       <RepairOrderForm user={user} initialTrucks={trucks} existing={{ id: order.id, values }} />
     </div>
   );

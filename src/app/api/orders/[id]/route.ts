@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { deleteOrder, getOrder, updateOrderFields } from "@/lib/db";
 import { apiSession } from "@/lib/session";
+import { ensureTranslations } from "@/lib/translate";
 import { firstIssue, repairOrderInputSchema } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
@@ -56,6 +57,7 @@ export async function PATCH(request: Request, { params }: Ctx) {
       start_time: d.start_time,
       finish_time: d.finish_time,
     });
+    after(() => ensureTranslations(updated));
     return NextResponse.json({ order: updated });
   } catch (err) {
     return NextResponse.json({ error: (err as Error).message }, { status: 400 });

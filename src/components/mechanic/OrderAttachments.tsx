@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useT } from "@/lib/i18n/client";
 import type { LocalPhoto } from "@/lib/offline";
 import { PhotoCapture } from "@/components/PhotoCapture";
 import { SignaturePad } from "@/components/SignaturePad";
@@ -9,6 +10,7 @@ import { SignaturePad } from "@/components/SignaturePad";
 /** Add photos or (re)sign an order that has already been submitted. Online only. */
 export function OrderAttachments({ orderId, hasSignature }: { orderId: string; hasSignature: boolean }) {
   const router = useRouter();
+  const t = useT();
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [signature, setSignature] = useState<string | null>(null);
   const [showSign, setShowSign] = useState(!hasSignature);
@@ -49,17 +51,17 @@ export function OrderAttachments({ orderId, hasSignature }: { orderId: string; h
 
   return (
     <section className="card flex flex-col gap-4 p-4">
-      <h2 className="section-title">Add to this order</h2>
+      <h2 className="section-title">{t("detail.addToOrder")}</h2>
       <div>
-        <span className="label">More photos</span>
+        <span className="label">{t("detail.morePhotos")}</span>
         <PhotoCapture photos={photos} onChange={setPhotos} />
       </div>
       <div>
         <div className="flex items-center justify-between">
-          <span className="label">{hasSignature ? "Replace signature" : "Signature"}</span>
+          <span className="label">{hasSignature ? t("detail.replaceSignature") : t("form.signature")}</span>
           {hasSignature && !showSign ? (
             <button type="button" onClick={() => setShowSign(true)} className="text-[13px] font-semibold text-brand">
-              Sign again
+              {t("detail.signAgain")}
             </button>
           ) : null}
         </div>
@@ -67,7 +69,7 @@ export function OrderAttachments({ orderId, hasSignature }: { orderId: string; h
       </div>
       {error ? <p className="text-[14px] font-medium text-danger">{error}</p> : null}
       <button type="button" onClick={() => void upload()} disabled={!dirty || busy} className="btn-primary">
-        {busy ? "Uploading…" : "Upload"}
+        {busy ? t("common.uploading") : t("common.upload")}
       </button>
     </section>
   );

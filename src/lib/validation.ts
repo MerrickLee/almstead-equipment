@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { BRANCHES, MANAGER_PASSCODE_MIN, MECHANIC_PIN_MAX, MECHANIC_PIN_MIN, TRUCK_KINDS } from "./constants";
+import { LANGS } from "./i18n/dictionary";
 
 const emptyToNull = (v: unknown) => (v === "" || v === undefined ? null : v);
 const trimmed = z.string().trim();
@@ -44,6 +45,7 @@ export const staffInputSchema = z
     full_name: trimmed.min(2).max(80),
     role: z.enum(["mechanic", "manager"]),
     branch: z.preprocess(emptyToNull, z.enum(BRANCHES).nullable()),
+    language: z.preprocess(emptyToNull, z.enum(LANGS).nullable()).optional(),
     passcode: z.string().min(1).max(100).optional(),
     active: z.boolean().optional(),
   })

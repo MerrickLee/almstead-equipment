@@ -41,6 +41,7 @@ export async function PATCH(request: Request, { params }: Ctx) {
       full_name: d.full_name,
       role: d.role,
       branch: d.branch,
+      ...(d.language !== undefined ? { language: d.language } : {}),
       ...(d.active !== undefined ? { active: d.active } : {}),
       ...(d.passcode ? { passcode_hash: await bcrypt.hash(d.passcode, 10), failed_attempts: 0, locked_until: null } : {}),
     });
